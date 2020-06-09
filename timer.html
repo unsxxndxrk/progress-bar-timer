@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Timer</title>
+
+	<style>
+		.content {
+			padding-top: 40px;
+		}
+
+		.block {
+			position: relative;
+			width: 300px;
+			margin: 0 auto;
+			height: 5px;
+			background: #dadada;
+			overflow: hidden;
+		}
+
+		.block-inner {
+			position: absolute;
+			height: 100%;
+			background: green;
+			width: 0;
+			transition: all .3s ease;
+		}
+
+		.time-wrapper {
+			text-align: center;
+			width: auto;
+			margin: 10px auto;
+		}
+
+		.button-set {
+			width: 400px;
+			margin: 0 auto;
+		}
+
+		.buttons {
+			width: 148px;
+			margin: 0 auto;
+		}
+	</style>
+
+</head>
+<body>
+
+	<div class="content">
+		
+		<!-- Loader -->
+
+		<div class="block" id="block">
+			<div id="loader" class="block-inner"></div>
+		</div>
+
+		<!-- Timer -->
+
+		<div class="time">
+			<div class="time-wrapper">
+				<span id="minutes"></span>m :
+				<span id="seconds"></span>s
+			</div>
+		</div>
+	
+		<!-- Controls -->
+
+		<div class="button-set">
+			<div class="buttons">
+				<button id="play">Play</button>
+				<button id="pause">Pause</button>
+				<button id="stop">Stop</button>
+			</div>
+		</div>
+		
+	</div>
+
+	<script>
+		"use strict";
+
+		window.onload = function() {
+			var 
+
+				/* Length of the timer */
+
+				minutes      = 1, 
+				seconds      = 10,
+
+				/* Timer tools */
+
+				localMinutes = minutes,   //copy of minutes
+				localSeconds = seconds,  //copy of seconds
+
+				/* Timer controls objects */
+
+				play         = document.getElementById('play'),  //play button
+				pause        = document.getElementById('pause'), //pause button
+				stop         = document.getElementById('stop'),
+
+				/* Loader timer objects */
+
+				block        = document.getElementById('block'),  //wrapper of the loader
+				loader       = document.getElementById('loader'),  //loader
+				
+				/* Preview timer objects */
+
+				minutesBlock = document.getElementById('minutes'),  //minutes block preview
+				secondsBlock = document.getElementById('seconds'),  //seconds block preview
+
+				/* Animation tools */
+
+				percent 	 = 0,                        //iterator
+				perSeconds   = (minutes * 60) + seconds,  //time in seconds
+				blockWidth   = block.offsetWidth;   //width of the wrapper
+
+			minutesBlock.innerHTML = minutes;  //show time
+			secondsBlock.innerHTML = seconds;
+
+			/* ---------Play--------- */
+
+			play.onclick = function() {
+
+				//timer
+				var isPlaying = setInterval(function() {
+					if (localMinutes === 0 && localSeconds === 0) {  //if timer is over
+						clearInterval(isPlaying);
+						loader.style.width = 100 + '%';
+					} else {
+						if (localSeconds === 0) {
+							localMinutes--;
+							minutesBlock.innerHTML = localMinutes;
+							localSeconds = 60;
+						}
+
+						localSeconds--;
+						loader.style.width = (++percent * blockWidth / perSeconds) + 'px';
+						secondsBlock.innerHTML = localSeconds;
+
+						if (localSeconds === 0 && localMinutes !== 0) {
+							localSeconds = 59;
+							secondsBlock.innerHTML = localSeconds;
+							localMinutes--;
+							minutesBlock.innerHTML = localMinutes;
+						}
+
+						/* ---------Pause--------- */
+
+						pause.onclick = function() {
+							var 
+								curMinutes = localMinutes, //remember current stage
+								curSeconds = localSeconds,
+								curPercent = percent,
+								curLoaderW = loader.offsetWidth;
+
+							clearInterval(isPlaying);  //stop timer and animation
+
+							localMinutes       = curMinutes;  //set previous to loader
+							localSeconds       = curSeconds;
+							percent            = curPercent;
+							loader.style.width = curLoaderW;
+						}
+
+						/* ---------Stop--------- */
+
+						stop.onclick = function() {
+							clearInterval(isPlaying);  //stop timer
+
+							localSeconds           = seconds;  //reset timer
+							localMinutes           = minutes; 
+
+							minutesBlock.innerHTML = minutes;  //show time
+							secondsBlock.innerHTML = seconds;
+
+							percent                = 0; //reset iterator
+
+							loader.style.width     = 0;    //reset animation
+						}
+					}
+				}, 1000);  //step
+			}
+		}
+	</script>
+
+</body>
+</html>
